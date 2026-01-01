@@ -3,58 +3,62 @@ using namespace std;
 
 int main()
 {
+
     int n;
     cin >> n;
     vector<int> v(n);
+    long long totalSum = 0;
     for (int i = 0; i < n; i++)
+    {
         cin >> v[i];
-
-    vector<long long> ps(n), ss(n);
-    ps[0] = v[0];
-    ss[n - 1] = v[n - 1];
-
-    for (int i = 1; i < n; i++)
-        ps[i] = ps[i - 1] + v[i];
-
-    for (int i = n - 2; i >= 0; i--)
-        ss[i] = ss[i + 1] + v[i];
-
-    vector<long long> maxSS(n);
-    long long maxSuffixSum = LLONG_MIN;
-    for (int i = n - 1; i >= 0; i--)
-    {
-        maxSuffixSum = max(maxSuffixSum, ss[i]);
-        maxSS[i] = maxSuffixSum;
+        totalSum += v[i];
+        v[i] = -1 * v[i];
     }
-    long long maxHappiness = LLONG_MIN;
-    int chosenI = -1;
-    maxHappiness = maxSS[0];
-    chosenI = -1;
-    for (int i = 0; i < n - 1; i++)
+    long long currSum = 0, maxSum = LLONG_MIN;
+    int st = 0, end = 0;
+    int smallestLen = n;
+    for (int i = 0; i < n; i++)
     {
-        long long happiness = ps[i] + maxSS[i + 1];
-        if (happiness > maxHappiness)
+        long long one = currSum + v[i];
+        long long two = v[i];
+        currSum = max(one, two);
+        if (currSum == one)
         {
-            maxHappiness = happiness;
-            chosenI = i;
+            end = i;
+        }
+        else
+        {
+            st = i;
+            end = i;
+        }
+        if (currSum > maxSum)
+        {
+            maxSum = currSum;
+            smallestLen = end - st + 1;
+        }
+        else if (currSum == maxSum)
+        {
+            smallestLen = min(smallestLen, end - st + 1);
+        }
+        if (currSum < 0)
+        {
+            currSum = 0;
+            st = i + 1;
+            end = i + 1;
         }
     }
-    if (chosenI == -1)
+    // cout << maxSum << " " << smallestLen << "\n";
+    if (maxSum <= 0)
     {
-        int j = 0;
-        for (int i = 0; i < n; i++)
-            if (ss[i] == maxSS[0])
-                j = i;
-        cout << n - j << " " << maxHappiness << "\n";
+        cout << n << " " << totalSum << "\n";
+    }
+    else if (smallestLen == n)
+    {
+        cout << 1 << " " << -1 * min(v[0], v[n - 1]) << "\n";
     }
     else
     {
-        int j = n;
-        for (int i = n - 1; i > chosenI; i--)
-            if (ss[i] == maxSS[chosenI + 1])
-                j = i;
-
-        cout << (chosenI + 1 + n - j) << " " << maxHappiness << "\n";
+        cout << n - smallestLen << " " << totalSum + maxSum << "\n";
     }
 
     return 0;
